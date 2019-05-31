@@ -22,6 +22,11 @@ class Fighter:
         results = []
         damage = self.power - target.fighter.defense
 
+    def heal(self, amount):
+        self.hp += amount
+
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
         if damage > 0:
             # target.fighter.take_damage(damage)
             # print('{0} attacks {1} for {2} hit points.'.format(

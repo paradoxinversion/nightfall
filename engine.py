@@ -16,7 +16,7 @@ def main():
     screen_width = 80
     screen_height = 50
 
-    bar_width = 7
+    bar_width = 20
     panel_height = 7
     panel_y = screen_height - panel_height
 
@@ -72,14 +72,15 @@ def main():
     game_state = GameStates.PLAYERS_TURN
     # Main Game Loop
     while not libtcod.console_is_window_closed():
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
+        libtcod.sys_check_for_event(
+            libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, fov_radius,
                           fov_light_walls, fov_algorithm)
 
         render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log,
-                   screen_width, screen_height, bar_width, panel_height, panel_y, colors)
+                   screen_width, screen_height, bar_width, panel_height, panel_y, mouse, colors)
         fov_recompute = False
         libtcod.console_flush()
 

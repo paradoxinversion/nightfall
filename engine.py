@@ -46,8 +46,10 @@ def main():
         'light_wall': libtcod.Color(130, 110, 50),
         'light_ground': libtcod.Color(200, 180, 50)
     }
+
     fighter_component = Fighter(hp=30, defense=2, power=5)
     inventory_component = Inventory(26)
+
     player = Entity(0, 0, "@", libtcod.white, "Player",
                     blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component)
     entities = [player]
@@ -93,12 +95,14 @@ def main():
         # Input Handling
         action = handle_keys(key, game_state)
 
+        # Actions
         move = action.get("move")
         inventory_index = action.get('inventory_index')
         exit = action.get("exit")
         show_inventory = action.get('show_inventory')
         pickup = action.get('pickup')
         fullscreen = action.get("fullscreen")
+
         player_turn_results = []
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
@@ -115,12 +119,12 @@ def main():
                     player.move(dx, dy)
                     fov_recompute = True
                 game_state = GameStates.ENEMY_TURN
+
         elif pickup and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
                 if entity.item and entity.x == player.x and entity.y == player.y:
                     pickup_results = player.inventory.add_item(entity)
                     player_turn_results.extend(pickup_results)
-
                     break
             else:
                 message_log.add_message(
@@ -158,6 +162,7 @@ def main():
                     message = kill_monster(dead_entity)
 
                 message_log.add_message(message)
+
             if item_added:
                 entities.remove(item_added)
 

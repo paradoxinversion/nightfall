@@ -9,6 +9,8 @@ class BasicMonster:
             if monster.distance_to(target) >= 2:
                 monster.move_astar(target, entities, game_map)
             elif target.fighter.hp > 0:
+                print("Attacking" + target.name)
                 attack_results = monster.fighter.attack(target)
+                print(attack_results)
                 results.extend(attack_results)
         return results

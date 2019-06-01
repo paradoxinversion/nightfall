@@ -7,6 +7,8 @@ def handle_keys(key, game_state):
         return handle_player_turn_keys(key)
     elif game_state == GameStates.PLAYER_DEAD:
         return handle_player_dead_keys(key)
+    elif game_state == GameStates.TARGETING:
+        return handle_targeting_keys(key)
     elif game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
         return handle_inventory_keys(key)
     return {}
@@ -47,6 +49,13 @@ def handle_player_turn_keys(key):
     return {}
 
 
+def handle_targeting_keys(key):
+    if key.vk == libtcod.KEY_ESCAPE:
+        return {'exit': True}
+
+    return {}
+
+
 def handle_player_dead_keys(key):
     key_char = chr(key.c)
 
@@ -63,6 +72,17 @@ def handle_player_dead_keys(key):
     return {}
 
 
+def handle_mouse(mouse):
+    (x, y) = (mouse.cx, mouse.cy)
+
+    if mouse.lbutton_pressed:
+        return {'left_click': (x, y)}
+    elif mouse.rbutton_pressed:
+        return {'right_click': (x, y)}
+
+    return {}
+
+
 def handle_inventory_keys(key):
     index = key.c - ord('a')
 
@@ -74,6 +94,19 @@ def handle_inventory_keys(key):
         return {'fullscreen': True}
     elif key.vk == libtcod.KEY_ESCAPE:
         # Exit the menu
+        return {'exit': True}
+
+    return {}
+
+
+def handle_main_menu(key):
+    key_char = chr(key.c)
+
+    if key_char == 'a':
+        return {'new_game': True}
+    elif key_char == 'b':
+        return {'load_game': True}
+    elif key_char == 'c' or key.vk == libtcod.KEY_ESCAPE:
         return {'exit': True}
 
     return {}

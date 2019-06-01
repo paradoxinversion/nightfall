@@ -13,7 +13,6 @@ class Fighter:
     def take_damage(self, amount):
         results = []
         self.hp -= amount
-        print(self.owner.name, self.owner.fighter.hp)
         if self.hp <= 0:
             results.append({"dead": self.owner})
         return results
@@ -22,9 +21,6 @@ class Fighter:
         results = []
         damage = self.power - target.fighter.defense
         if damage > 0:
-            # target.fighter.take_damage(damage)
-            # print('{0} attacks {1} for {2} hit points.'.format(
-            #     self.owner.name.capitalize(), target.name, str(damage)))
             results.append({"message": Message('{0} attacks {1} for {2} hit points.'.format(
                 self.owner.name.capitalize(), target.name, str(damage)), libtcod.white)})
             results.extend(target.fighter.take_damage(damage))

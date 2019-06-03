@@ -13,6 +13,7 @@ class RenderOrder(Enum):
 
 
 def get_names_under_mouse(mouse, entities, fov_map):
+    """Gets the names of entities beneath the mouse's position"""
     (x, y) = (mouse.cx, mouse.cy)
 
     names = [entity.name for entity in entities if entity.x == x and entity.y ==
@@ -23,6 +24,7 @@ def get_names_under_mouse(mouse, entities, fov_map):
 
 
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
+    """Renders a bar with a min/max value that that can be used for health and other stats"""
     bar_width = int(float(value) / maximum * total_width)
 
     libtcod.console_set_default_background(panel, back_color)
@@ -40,6 +42,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
 
 
 def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width,  panel_height, panel_y, mouse, colors, game_state):
+    # Recompute Field of View if necessary
     if fov_recompute:
         for y in range(game_map.height):
             for x in range(game_map.width):
@@ -63,13 +66,14 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
                         libtcod.console_set_char_background(
                             con, x, y, colors.get("dark_ground"), libtcod.BKGND_SET)
 
+    # Sort and render Entities
     entities_in_render_order = sorted(
         entities, key=lambda x: x.render_order.value)
-    # Draw all entities in the list
     for entity in entities_in_render_order:
         draw_entity(con, entity, fov_map, game_map)
 
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
+
     if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
         if game_state == GameStates.SHOW_INVENTORY:
             inventory_title = 'Press the key next to an item to use it, or Esc to cancel.\n'
@@ -81,7 +85,7 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
         level_up_menu(con, 'Level up! Choose a stat to raise:',
                       player, 40, screen_width, screen_height)
     elif game_state == GameStates.CHARACTER_SCREEN:
-        character_screen(player, 30, 10, screen_width, screen_height)
+        character_screen(player, 30, 15, screen_width, screen_height)
     libtcod.console_set_default_background(panel, libtcod.black)
     libtcod.console_clear(panel)
 

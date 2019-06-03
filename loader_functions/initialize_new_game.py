@@ -14,6 +14,8 @@ from render_functions import RenderOrder
 from components.equipment import Equipment
 from components.equippable import Equippable
 from equipment_slots import EquipmentSlots
+from components.race import Race
+from generators.character_generator import generate_character
 
 
 def get_constants():
@@ -78,12 +80,13 @@ def get_constants():
 
 
 def get_game_variables(constants):
-    fighter_component = Fighter(hp=100, defense=1, power=2)
-    inventory_component = Inventory(26)
-    level_component = Level()
-    equipment_component = Equipment()
-    player = Entity(0, 0, '@', libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
-                    fighter=fighter_component, inventory=inventory_component, level=level_component, equipment=equipment_component)
+    # fighter_component = Fighter(hp=100, defense=1, power=2)
+    # inventory_component = Inventory(26)
+    # level_component = Level()
+    # equipment_component = Equipment()
+    # player = Entity(0, 0, '@', libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
+    #                 fighter=fighter_component, inventory=inventory_component, level=level_component, equipment=equipment_component, race="human")
+    player = generate_character("human")
     entities = [player]
 
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)

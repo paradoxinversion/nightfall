@@ -2,6 +2,11 @@ import tcod as libtcod
 
 from game_messages import Message
 
+basic_skills = [
+    {'skill': 'fighting', 'rank': .9, 'logged_rank': 0},
+    {'skill': 'dodging', 'rank': 0, 'logged_rank': 0}
+]
+
 
 class Fighter:
     def __init__(self, hp, defense, power, xp=0):
@@ -10,6 +15,7 @@ class Fighter:
         self.base_defense = defense
         self.base_power = power
         self.xp = xp
+        self.skils = basic_skills
 
     @property
     def max_hp(self):

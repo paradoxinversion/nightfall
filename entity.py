@@ -2,6 +2,8 @@ import math
 import tcod as libtcod
 from render_functions import RenderOrder
 from components.item import Item
+from components.race import Race
+from race_templates import race_templates
 
 
 class Entity:
@@ -10,7 +12,7 @@ class Entity:
     """
 
     def __init__(self, x, y, char, color, name, blocks=False, render_order=RenderOrder.CORPSE, fighter=None, ai=None,
-                 item=None, inventory=None, stairs=None, level=None, equipment=None, equippable=None):
+                 item=None, inventory=None, stairs=None, level=None, equipment=None, equippable=None, character=None):
         self.x = x
         self.y = y
         self.char = char
@@ -26,6 +28,7 @@ class Entity:
         self.level = level
         self.equipment = equipment
         self.equippable = equippable
+        self.character = character
 
         if self.fighter:
             self.fighter.owner = self
@@ -55,6 +58,9 @@ class Entity:
                 item = Item()
                 self.item = item
                 self.item.owner = self
+
+        if self.character:
+            self.character.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount

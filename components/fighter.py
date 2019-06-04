@@ -9,13 +9,14 @@ basic_skills = [
 
 
 class Fighter:
-    def __init__(self, hp, defense, power, xp=0):
+    def __init__(self, hp, defense, power, xp=0, known_attacks=[]):
         self.base_max_hp = hp
         self.hp = hp
         self.base_defense = defense
         self.base_power = power
         self.xp = xp
         self.skils = basic_skills
+        self.known_attacks = known_attacks
 
     @property
     def max_hp(self):
@@ -68,3 +69,13 @@ class Fighter:
 
         if self.hp > self.max_hp:
             self.hp = self.max_hp
+
+
+class Attack(object):
+    def __init__(self, name,  attack_description, hit_description, damage_type, is_melee_attack, is_weapon_attack):
+        self.name = name
+        self.attack_desc = attack_description
+        self.hit_desc = hit_description
+        self.damage_type = damage_type
+        self.is_melee_attack = is_melee_attack
+        self.is_weapon_attack = is_weapon_attack

@@ -2,7 +2,6 @@ import math
 import tcod as libtcod
 from render_functions import RenderOrder
 from components.item import Item
-from components.race import Race
 from race_templates import race_templates
 
 

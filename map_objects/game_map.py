@@ -14,6 +14,7 @@ from item_functions import heal, cast_lightning, cast_fireball, cast_confuse
 from game_messages import Message
 from components.stairs import Stairs
 from random_utils import from_dungeon_level, random_choice_from_dict
+from generators.character_generator import generate_character
 
 
 class GameMap:
@@ -51,7 +52,6 @@ class GameMap:
                 (new_x, new_y) = new_room.center()
                 center_of_last_room_x = new_x
                 center_of_last_room_y = new_y
-                print("Creating room at " + str((x, y)))
                 if num_rooms == 0:
                     player.x = new_x
                     player.y = new_y
@@ -120,14 +120,17 @@ class GameMap:
                         hp=20, defense=0, power=4, xp=35)
                     ai_component = BasicMonster()
 
-                    monster = Entity(
-                        x, y, "o", libtcod.desaturated_green, "Orc", blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+                    # monster = Entity(
+                    #     x, y, "o", libtcod.desaturated_green, "Orc", blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+                    monster = generate_character(x, y, "human", True)
                 else:
                     fighter_component = Fighter(
                         hp=30, defense=2, power=8, xp=100)
                     ai_component = BasicMonster()
-                    monster = Entity(
-                        x, y, "T", libtcod.darker_green, "Troll", blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+                    # monster = Entity(
+                    #     x, y, "T", libtcod.darker_green, "Troll", blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+                    monster = generate_character(x, y, "human", True)
+
                 entities.append(monster)
         for i in range(number_of_items):
             x = randint(room.x1 + 1, room.x2 - 1)

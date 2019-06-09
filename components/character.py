@@ -1,7 +1,7 @@
 class Character:
-    def __init__(self, race, age):
-        self.race = race
-        self.age = age
+    """Represents NON-COMBAT data about a game entity"""
 
-        if self.race:
-            self.race.owner = self
+    def __init__(self, age, race_template):
+        self.race_name = race_template["race_name"]
+        self.race_description = race_template["race_description"]
+        self.age = age

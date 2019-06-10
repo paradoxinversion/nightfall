@@ -15,6 +15,8 @@ from components.equipment import Equipment
 from components.equippable import Equippable
 from equipment_slots import EquipmentSlots
 from generators.character_generator import generate_character
+from attack_definitions import blade_attack_definitions
+from generators.generator_helpers import generate_attack_set
 
 
 def get_constants():
@@ -88,7 +90,8 @@ def get_game_variables(constants):
     player = generate_character(0, 0, "human", False)
     entities = [player]
 
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    equippable_component = Equippable(
+        EquipmentSlots.MAIN_HAND, attack_bonus=2, attacks=generate_attack_set(blade_attack_definitions))
     dagger = Entity(0, 0, '-', libtcod.sky, 'Dagger',
                     equippable=equippable_component)
     player.inventory.add_item(dagger)

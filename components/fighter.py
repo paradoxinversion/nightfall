@@ -59,7 +59,16 @@ class Fighter:
 
     @property
     def total_attack(self):
-        return int(self.strength)
+        total = int(self.attack_bonus)
+        return total
+
+    @property
+    def attack_bonus(self):
+        if self.owner and self.owner.equipment:
+            attack_bonus = self.owner.equipment.attack_bonus
+        else:
+            attack_bonus = 0
+        return attack_bonus
 
     @property
     def defense(self):
@@ -84,15 +93,29 @@ class Fighter:
             else:
                 atk_using = self.owner.equipment.main_hand.equippable.equippable_attacks[randint(
                     0, len(self.owner.equipment.main_hand.equippable.equippable_attacks)-1)]
+
+        # Attack Contest
+        print(self.owner.name, self.attack_bonus)
+        attack_roll = randint(1, 10+self.total_attack)
+        defense_roll = randint(1, 10+target.fighter.defense)
+
         results = []
-        damage = self.total_attack - target.fighter.defense
-        attack_msg = atk_using.hit_description.format(
-            self.owner.name.capitalize(), target.name, str(damage))
-        if damage > 0:
-            results.append({"message": Message(attack_msg, libtcod.white)})
-            results.extend(target.fighter.take_damage(damage))
+        if (attack_roll > defense_roll):
+            if self.owner and self.owner.equipment and self.owner.equipment.main_hand:
+                weapon_damage = self.owner.equipment.main_hand.equippable.damage_bonus
+            else:
+                weapon_damage = 0
+            damage = self.total_attack + weapon_damage - target.fighter.defense
+            attack_msg = atk_using.hit_description.format(
+                self.owner.name.capitalize(), target.name, str(damage))
+            if damage > 0:
+                results.append({"message": Message(attack_msg, libtcod.white)})
+                results.extend(target.fighter.take_damage(damage))
+            else:
+                results.append({"message": Message('{0} attacks {1} but does no damage.'.format(
+                    self.owner.name.capitalize(), target.name), libtcod.white)})
         else:
-            results.append({"message": Message('{0} attacks {1} but does no damage.'.format(
+            results.append({"message": Message('{0} misses {1}!'.format(
                 self.owner.name.capitalize(), target.name), libtcod.white)})
         return results
 

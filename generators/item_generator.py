@@ -11,8 +11,9 @@ def generate_weapon_equippable(weapon_definition):
     """Generates a weapon"""
     attack_bonus = weapon_definition["attack_bonus"]
     damage_bonus = weapon_definition["base_damage"]
+    stamina_use = weapon_definition["stamina_use"]
     equippable_component = Equippable(
-        EquipmentSlots.MAIN_HAND, attack_bonus=attack_bonus, damage_bonus=damage_bonus, attacks=generate_attack_set(blade_attack_definitions))
+        EquipmentSlots.MAIN_HAND, attack_bonus=attack_bonus, damage_bonus=damage_bonus, attacks=generate_attack_set(blade_attack_definitions), stamina_use=stamina_use)
     return equippable_component
 
 

@@ -9,6 +9,7 @@ from game_messages import Message
 from loader_functions.initialize_new_game import get_constants, get_game_variables
 from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
+from components.ai import ExhaustedAI
 
 
 def main():
@@ -137,44 +138,54 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         right_click = mouse_action.get('right_click')
 
         player_turn_results = []
+        if player.ai:
+            player.ai.take_turn()
+        else:
+            if move and game_state == GameStates.PLAYERS_TURN:
 
-        if move and game_state == GameStates.PLAYERS_TURN:
-            dx, dy = move
-            destination_x = player.x + dx
-            destination_y = player.y + dy
+                dx, dy = move
+                destination_x = player.x + dx
+                destination_y = player.y + dy
 
-            if not game_map.is_blocked(destination_x, destination_y):
-                target = get_blocking_entities_at_location(
-                    entities, destination_x, destination_y)
+                if not game_map.is_blocked(destination_x, destination_y):
+                    target = get_blocking_entities_at_location(
+                        entities, destination_x, destination_y)
 
-                if target:
-                    if target.fighter.is_hostile or target.fighter.is_attackable:
-                        attack_results = player.fighter.attack(target)
-                        player_turn_results.extend(attack_results)
+                    if target:
+                        if target.fighter.is_hostile or target.fighter.is_attackable:
+                            attack_results = player.fighter.attack(target)
+                            player_turn_results.extend(attack_results)
+                        else:
+                            tmp = (player.x, player.y)
+                            player.x = target.x
+                            player.y = target.y
+                            target.x, target.y = tmp
+                            fov_recompute = True
                     else:
-                        tmp = (player.x, player.y)
-                        player.x = target.x
-                        player.y = target.y
-                        target.x, target.y = tmp
+                        player.move(dx, dy)
+
                         fov_recompute = True
-                else:
-                    player.move(dx, dy)
 
-                    fov_recompute = True
-
+                    game_state = GameStates.ENEMY_TURN
+            elif wait:
+                player_turn_results.extend(player.fighter.regain_stamina(1))
                 game_state = GameStates.ENEMY_TURN
-        elif wait:
-            game_state = GameStates.ENEMY_TURN
-        elif pickup and game_state == GameStates.PLAYERS_TURN:
-            for entity in entities:
-                if entity.item and entity.x == player.x and entity.y == player.y:
-                    pickup_results = player.inventory.add_item(entity)
-                    player_turn_results.extend(pickup_results)
+            elif pickup and game_state == GameStates.PLAYERS_TURN:
+                for entity in entities:
+                    if entity.item and entity.x == player.x and entity.y == player.y:
+                        pickup_results = player.inventory.add_item(entity)
+                        player_turn_results.extend(pickup_results)
 
-                    break
-            else:
+                        break
+                else:
+                    message_log.add_message(
+                        Message('There is nothing here to pick up.', libtcod.yellow))
+            elif make_hostile:
+                previous_game_state = game_state
+                game_state = GameStates.TARGETING
+                targeting_for_hostility = True
                 message_log.add_message(
-                    Message('There is nothing here to pick up.', libtcod.yellow))
+                    Message('Left click the character you wish to attack or right click to cancel', libtcod.yellow))
 
         if show_inventory:
             previous_game_state = game_state
@@ -193,13 +204,6 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     item, entities=entities, fov_map=fov_map))
             elif game_state == GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
-
-        if make_hostile:
-            previous_game_state = game_state
-            game_state = GameStates.TARGETING
-            targeting_for_hostility = True
-            message_log.add_message(
-                Message('Left click the character you wish to attack or right click to cancel', libtcod.yellow))
 
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
@@ -267,6 +271,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             equip = player_turn_result.get('equip')
             targeting = player_turn_result.get('targeting')
             targeting_cancelled = player_turn_result.get('targeting_cancelled')
+            exhausted = player_turn_result.get('exhausted')
             xp = player_turn_result.get('xp')
             if message:
                 message_log.add_message(message)
@@ -278,7 +283,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     message = kill_monster(dead_entity)
 
                 message_log.add_message(message)
-
+            if exhausted:
+                player.set_ai(ExhaustedAI())
             if item_added:
                 entities.remove(item_added)
 

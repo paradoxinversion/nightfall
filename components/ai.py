@@ -41,6 +41,15 @@ class HostileAI:
         return results
 
 
+class ExhaustedAI:
+    def take_turn(self):
+        results = []
+        actor = self.owner
+        results.append(
+            {"message": Message('{0} is exhausted!'.format(actor.name), libtcod.red)})
+        return results
+
+
 class ConfusedMonster:
     def __init__(self, previous_ai, number_of_turns=10):
         self.previous_ai = previous_ai

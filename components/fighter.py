@@ -1,4 +1,5 @@
 import tcod as libtcod
+import decimal
 
 from game_messages import Message
 from random import randint
@@ -12,6 +13,7 @@ class Fighter:
     def __init__(self, hp, endurance, strength, intelligence, willpower, xp=0, known_attacks=[]):
         self.base_max_hp = hp
         self.hp = hp
+        self.stamina = endurance
         self.base_endurance = endurance
         self.base_strength = strength
         self.base_intelligence = intelligence
@@ -78,6 +80,10 @@ class Fighter:
     def defense(self):
         return self.endurance
 
+    @property
+    def max_stamina(self):
+        return self.endurance
+
     def take_damage(self, amount):
         results = []
         self.hp -= amount
@@ -85,19 +91,42 @@ class Fighter:
             results.append({"dead": self.owner, 'xp': self.xp})
         return results
 
+    def expend_stamina(self, amount):
+        results = []
+
+        with decimal.localcontext() as ctx:
+            ctx.prec = 3
+            newStamina = decimal.Decimal(
+                self.stamina) - decimal.Decimal(amount)
+        self.stamina = newStamina
+        if self.stamina <= 0:
+            self.stamina = 0
+            results.append({"exhausted": self.owner})
+        return results
+
+    def regain_stamina(self, amount):
+        with decimal.localcontext() as ctx:
+            ctx.prec = 3
+            newStamina = decimal.Decimal(
+                self.stamina) + decimal.Decimal(amount)
+        self.stamina = newStamina
+        if (self.stamina >= self.max_stamina):
+            self.stamina = self.max_stamina
+        return []
+
     def attack(self, target, attack_type=None):
         target.fighter.last_attacker = self.owner
         target.fighter.attacked_last_tick = True
         is_unarmed = self.owner.equipment.main_hand == None
 
         if attack_type != None:
-            atk_using = attack_type
+            chosen_attack = attack_type
         else:
             if is_unarmed:
-                atk_using = self.known_attacks[randint(
+                chosen_attack = self.known_attacks[randint(
                     0, len(self.known_attacks)-1)]
             else:
-                atk_using = self.owner.equipment.main_hand.equippable.equippable_attacks[randint(
+                chosen_attack = self.owner.equipment.main_hand.equippable.equippable_attacks[randint(
                     0, len(self.owner.equipment.main_hand.equippable.equippable_attacks)-1)]
 
         # Attack Contest
@@ -105,13 +134,16 @@ class Fighter:
         defense_roll = randint(1, 10+target.fighter.defense)
 
         results = []
+        if self.owner and self.owner.equipment and self.owner.equipment.main_hand:
+            self.owner.fighter.expend_stamina(
+                self.owner.equipment.main_hand.equippable.stamina_use)
         if (attack_roll > defense_roll):
             if self.owner and self.owner.equipment and self.owner.equipment.main_hand:
                 weapon_damage = self.owner.equipment.main_hand.equippable.damage_bonus
             else:
                 weapon_damage = 0
             damage = self.total_attack + weapon_damage - target.fighter.defense
-            attack_msg = atk_using.hit_description.format(
+            attack_msg = chosen_attack.hit_description.format(
                 self.owner.name.capitalize(), target.name, str(damage))
             if damage > 0:
                 results.append({"message": Message(attack_msg, libtcod.white)})

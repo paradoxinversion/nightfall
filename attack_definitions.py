@@ -23,6 +23,7 @@ blade_attack_definitions = {
         "hit_description": "{0} cuts {1}, dealing {2} damage!",
         "damage_type": "slashing",
         "is_melee_attack": True,
-        "is_weapon_attack": True
+        "is_weapon_attack": True,
+        "stamina_use": 0.2
     }
 }

@@ -3,6 +3,14 @@ from random import randint
 from game_messages import Message
 
 
+class NeutralAI:
+    def take_turn(self, target, fov_map, game_map, entities):
+        results = []
+        actor = self.owner
+
+        return results
+
+
 class BasicMonster:
     def take_turn(self, target, fov_map, game_map, entities):
         results = []

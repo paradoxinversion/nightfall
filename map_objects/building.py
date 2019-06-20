@@ -40,6 +40,7 @@ class Building(object):
     def map_center(self):
         return [self.x + int(self.width/2), self.y + int(self.height/2)]
 
+    @property
     def center(self):
         center_x = int((self.x1 + self.x2) / 2)
         center_y = int((self.y1 + self.y2) / 2)

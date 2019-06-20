@@ -104,7 +104,7 @@ def get_game_variables(constants):
     # game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
     #                   constants['map_width'], constants['map_height'], player, entities)
     game_map.make_overworld_map(
-        1, ["player_house"], constants['map_width'], constants['map_height'], player, entities, True)
+        6, ["player_house"], constants['map_width'], constants['map_height'], player, entities, True)
     message_log = MessageLog(
         constants['message_x'], constants['message_width'], constants['message_height'])
 

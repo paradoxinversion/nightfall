@@ -52,25 +52,31 @@ class GameMap:
     def make_overworld_map(self, max_buildings, possible_schematics, map_width, map_height, player, entities, place_player_home=False):
         print("Creating overworld map...")
         buildings = []
-        num_buildings = 0
 
         if place_player_home:
             player_house = generate_building(
                 building_schematics["player_house"])
             x = randint(0, map_width - player_house.width - 2)
             y = randint(0, map_height - player_house.height - 2)
-            print(x, y)
             self.place_building(player_house, x, y)
             player.x = player_house.map_center[0]
             player.y = player_house.map_center[1]
-            num_buildings += 1
             buildings.append(player_house)
 
-        # for i in range(num_buildings):
-        #     x = randint(0, map_width - w - 1)
-        #     y = randint(0, map_height - h - 1)
-        #     self.place_building(
-        #         building_schematics["basic_house"], 10, 10)
+        for i in range(max_buildings):
+            new_building = generate_building(
+                building_schematics["basic_house"])
+            x = randint(0, map_width - new_building.width - 2)
+            y = randint(0, map_height - new_building.height - 2)
+            new_building.x = x
+            new_building.y = y
+            for other_building in buildings:
+                if new_building.intersect(other_building):
+                    break
+            else:
+                self.place_building(new_building, x, y)
+                self.place_building_entities(new_building, entities)
+                buildings.append(new_building)
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities):
 
@@ -131,6 +137,11 @@ class GameMap:
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
+
+    def place_building_entities(self, building, entities):
+        (x, y) = building.center
+        building_owner = generate_character(x, y, "human", True)
+        entities.append(building_owner)
 
     def place_entities(self, room, entities):
         max_monsters_per_room = from_dungeon_level(

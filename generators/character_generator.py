@@ -9,7 +9,7 @@ from components.character import Character
 from render_functions import RenderOrder
 from race_templates import race_templates
 from random import randint
-from components.ai import BasicMonster
+from components.ai import BasicMonster, NeutralAI
 from pprint import pprint
 from generators.generator_helpers import generate_attack_set
 
@@ -50,7 +50,7 @@ def generate_character(x, y, race, with_AI):
     ai_component = None
 
     if with_AI:
-        ai_component = BasicMonster()
+        ai_component = NeutralAI()
         character_name = race_template["race_name"]
         color = libtcod.gray
     else:

@@ -31,13 +31,14 @@ class GameMap:
                  for x in range(self.width)]
         return tiles
 
-    def create_building(self, schematic, x, y):
+    def place_building(self, building, x, y):
         """Places a building on the map"""
-        new_building = generate_building(schematic, x, y)
-        for dx in range(new_building.width):
-            for dy in range(new_building.height):
-                char = new_building.schematic[dy][dx]
-                map_tile = self.tiles[y+dy][x+dx]
+        building.x = x
+        building.y = y
+        for dx in range(building.width):
+            for dy in range(building.height):
+                char = building.schematic[dy][dx]
+                map_tile = self.tiles[x+dx][y+dy]
                 if char == '#':
                     map_tile.blocked = True
                     map_tile.block_sight = True
@@ -47,17 +48,29 @@ class GameMap:
                 elif char == "D":
                     map_tile.blocked = False
                     map_tile.block_sight = False
-        return new_building
 
     def make_overworld_map(self, max_buildings, possible_schematics, map_width, map_height, player, entities, place_player_home=False):
         print("Creating overworld map...")
+        buildings = []
         num_buildings = 0
 
         if place_player_home:
-            player_house = self.create_building(
-                building_schematics["player_house"], 10, 10)
+            player_house = generate_building(
+                building_schematics["player_house"])
+            x = randint(0, map_width - player_house.width - 2)
+            y = randint(0, map_height - player_house.height - 2)
+            print(x, y)
+            self.place_building(player_house, x, y)
             player.x = player_house.map_center[0]
             player.y = player_house.map_center[1]
+            num_buildings += 1
+            buildings.append(player_house)
+
+        # for i in range(num_buildings):
+        #     x = randint(0, map_width - w - 1)
+        #     y = randint(0, map_height - h - 1)
+        #     self.place_building(
+        #         building_schematics["basic_house"], 10, 10)
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities):
 

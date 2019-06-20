@@ -147,8 +147,15 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     entities, destination_x, destination_y)
 
                 if target:
-                    attack_results = player.fighter.attack(target)
-                    player_turn_results.extend(attack_results)
+                    if target.fighter.is_hostile:
+                        attack_results = player.fighter.attack(target)
+                        player_turn_results.extend(attack_results)
+                    else:
+                        tmp = (player.x, player.y)
+                        player.x = target.x
+                        player.y = target.y
+                        target.x, target.y = tmp
+                        fov_recompute = True
                 else:
                     player.move(dx, dy)
 

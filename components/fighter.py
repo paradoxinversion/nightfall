@@ -21,6 +21,7 @@ class Fighter:
         self.skils = basic_skills
         self.known_attacks = known_attacks
         self.owner = None
+        self.is_hostile = False
 
     @property
     def max_hp(self):

@@ -7,7 +7,9 @@ class NeutralAI:
     def take_turn(self, target, fov_map, game_map, entities):
         results = []
         actor = self.owner
-
+        if actor.fighter.attacked_last_tick:
+            if actor.fighter.last_attacker is not None:
+                self.owner.set_ai(HostileAI())
         return results
 
 
@@ -20,6 +22,21 @@ class BasicMonster:
                 monster.move_astar(target, entities, game_map)
             elif target.fighter.hp > 0:
                 attack_results = monster.fighter.attack(target)
+                results.extend(attack_results)
+        return results
+
+
+class HostileAI:
+    def take_turn(self, target, fov_map, game_map, entities):
+        results = []
+        actor = self.owner
+        if actor.fighter.last_attacker:
+            target = actor.fighter.last_attacker
+        if libtcod.map_is_in_fov(fov_map, actor.x, actor.y):
+            if actor.distance_to(target) >= 2:
+                actor.move_astar(target, entities, game_map)
+            elif target.fighter.hp > 0:
+                attack_results = actor.fighter.attack(target)
                 results.extend(attack_results)
         return results
 

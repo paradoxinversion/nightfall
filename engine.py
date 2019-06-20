@@ -128,6 +128,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         level_up = action.get('level_up')
         show_character_screen = action.get('show_character_screen')
         wait = action.get('wait')
+        make_hostile = action.get("make_hostile")
 
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
@@ -147,7 +148,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     entities, destination_x, destination_y)
 
                 if target:
-                    if target.fighter.is_hostile:
+                    if target.fighter.is_hostile or target.fighter.is_attackable:
                         attack_results = player.fighter.attack(target)
                         player_turn_results.extend(attack_results)
                     else:
@@ -193,6 +194,13 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             elif game_state == GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
 
+        if make_hostile:
+            previous_game_state = game_state
+            game_state = GameStates.TARGETING
+            targeting_for_hostility = True
+            message_log.add_message(
+                Message('Left click the character you wish to attack or right click to cancel', libtcod.yellow))
+
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
                 if entity.stairs and entity.x == player.x and entity.y == player.y:
@@ -224,10 +232,16 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         if game_state == GameStates.TARGETING:
             if left_click:
                 target_x, target_y = left_click
-
-                item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map,
-                                                        target_x=target_x, target_y=target_y)
-                player_turn_results.extend(item_use_results)
+                if targeting_for_hostility:
+                    for entity in entities:
+                        if entity.x == target_x and entity.y == target_y and entity.ai:
+                            entity.fighter.is_attackable = True
+                            player_turn_results.append(
+                                {'targeting': True})
+                else:
+                    item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map,
+                                                            target_x=target_x, target_y=target_y)
+                    player_turn_results.extend(item_use_results)
             elif right_click:
                 player_turn_results.append({'targeting_cancelled': True})
 
@@ -298,10 +312,15 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             if targeting:
                 previous_game_state = GameStates.PLAYERS_TURN
                 game_state = GameStates.TARGETING
+                if targeting_for_hostility:
+                    message_log.add_message(
+                        Message('...', libtcod.red))
+                    game_state = GameStates.ENEMY_TURN
+                else:
+                    targeting_item = targeting
 
-                targeting_item = targeting
-
-                message_log.add_message(targeting_item.item.targeting_message)
+                    message_log.add_message(
+                        targeting_item.item.targeting_message)
 
             if targeting_cancelled:
                 game_state = previous_game_state
@@ -323,6 +342,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 if entity.ai:
                     enemy_turn_results = entity.ai.take_turn(
                         player, fov_map, game_map, entities)
+                    entity.fighter.attacked_last_tick = False
 
                     for enemy_turn_result in enemy_turn_results:
                         message = enemy_turn_result.get('message')

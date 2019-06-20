@@ -61,6 +61,10 @@ class Entity:
         if self.character:
             self.character.owner = self
 
+    def set_ai(self, new_ai):
+        self.ai = new_ai
+        self.ai.owner = self
+
     def move(self, dx, dy):
         # Move the entity by a given amount
         self.x += dx

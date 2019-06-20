@@ -22,6 +22,9 @@ class Fighter:
         self.known_attacks = known_attacks
         self.owner = None
         self.is_hostile = False
+        self.is_attackable = False
+        self.last_attacker = None
+        self.attacked_last_tick = False
 
     @property
     def max_hp(self):
@@ -83,6 +86,8 @@ class Fighter:
         return results
 
     def attack(self, target, attack_type=None):
+        target.fighter.last_attacker = self.owner
+        target.fighter.attacked_last_tick = True
         is_unarmed = self.owner.equipment.main_hand == None
 
         if attack_type != None:
@@ -96,7 +101,6 @@ class Fighter:
                     0, len(self.owner.equipment.main_hand.equippable.equippable_attacks)-1)]
 
         # Attack Contest
-        print(self.owner.name, self.attack_bonus)
         attack_roll = randint(1, 10+self.total_attack)
         defense_roll = randint(1, 10+target.fighter.defense)
 

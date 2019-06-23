@@ -138,54 +138,51 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         right_click = mouse_action.get('right_click')
 
         player_turn_results = []
-        if player.ai:
-            player.ai.take_turn()
-        else:
-            if move and game_state == GameStates.PLAYERS_TURN:
+        if move and game_state == GameStates.PLAYERS_TURN:
 
-                dx, dy = move
-                destination_x = player.x + dx
-                destination_y = player.y + dy
+            dx, dy = move
+            destination_x = player.x + dx
+            destination_y = player.y + dy
 
-                if not game_map.is_blocked(destination_x, destination_y):
-                    target = get_blocking_entities_at_location(
-                        entities, destination_x, destination_y)
+            if not game_map.is_blocked(destination_x, destination_y):
+                target = get_blocking_entities_at_location(
+                    entities, destination_x, destination_y)
 
-                    if target:
-                        if target.fighter.is_hostile or target.fighter.is_attackable:
-                            attack_results = player.fighter.attack(target)
-                            player_turn_results.extend(attack_results)
-                        else:
-                            tmp = (player.x, player.y)
-                            player.x = target.x
-                            player.y = target.y
-                            target.x, target.y = tmp
-                            fov_recompute = True
+                if target:
+                    if target.fighter.is_hostile or target.fighter.is_attackable:
+                        attack_results = player.fighter.attack(target)
+                        player_turn_results.extend(attack_results)
                     else:
-                        player.move(dx, dy)
-
+                        tmp = (player.x, player.y)
+                        player.x = target.x
+                        player.y = target.y
+                        target.x, target.y = tmp
                         fov_recompute = True
-
-                    game_state = GameStates.ENEMY_TURN
-            elif wait:
-                player_turn_results.extend(player.fighter.regain_stamina(1))
-                game_state = GameStates.ENEMY_TURN
-            elif pickup and game_state == GameStates.PLAYERS_TURN:
-                for entity in entities:
-                    if entity.item and entity.x == player.x and entity.y == player.y:
-                        pickup_results = player.inventory.add_item(entity)
-                        player_turn_results.extend(pickup_results)
-
-                        break
                 else:
-                    message_log.add_message(
-                        Message('There is nothing here to pick up.', libtcod.yellow))
-            elif make_hostile:
-                previous_game_state = game_state
-                game_state = GameStates.TARGETING
-                targeting_for_hostility = True
+                    player.move(dx, dy)
+
+                    fov_recompute = True
+
+                game_state = GameStates.ENEMY_TURN
+        elif wait:
+            player_turn_results.extend(player.fighter.regain_stamina(1))
+            game_state = GameStates.ENEMY_TURN
+        elif pickup and game_state == GameStates.PLAYERS_TURN:
+            for entity in entities:
+                if entity.item and entity.x == player.x and entity.y == player.y:
+                    pickup_results = player.inventory.add_item(entity)
+                    player_turn_results.extend(pickup_results)
+
+                    break
+            else:
                 message_log.add_message(
-                    Message('Left click the character you wish to attack or right click to cancel', libtcod.yellow))
+                    Message('There is nothing here to pick up.', libtcod.yellow))
+        elif make_hostile:
+            previous_game_state = game_state
+            game_state = GameStates.TARGETING
+            targeting_for_hostility = True
+            message_log.add_message(
+                Message('Left click the character you wish to attack or right click to cancel', libtcod.yellow))
 
         if show_inventory:
             previous_game_state = game_state

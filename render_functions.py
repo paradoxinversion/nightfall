@@ -97,7 +97,8 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
         y += 1
     render_bar(panel, 1, 1, bar_width, 'HP', player.fighter.hp, player.fighter.max_hp,
                libtcod.light_red, libtcod.darker_red)
-    render_bar(panel, 1, 2, bar_width, 'Stam.', player.fighter.stamina, player.fighter.max_stamina,
+    stamina_label = "Stam" if not "exhausted" in player.fighter.effects else "Stam (E)"
+    render_bar(panel, 1, 2, bar_width, stamina_label, player.fighter.stamina, player.fighter.max_stamina,
                libtcod.dark_green, libtcod.grey)
     libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT,
                              'Dungeon level: {0}'.format(game_map.dungeon_level))

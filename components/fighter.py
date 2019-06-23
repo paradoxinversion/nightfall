@@ -27,6 +27,7 @@ class Fighter:
         self.is_attackable = False
         self.last_attacker = None
         self.attacked_last_tick = False
+        self.effects = {}
 
     @property
     def max_hp(self):
@@ -52,7 +53,8 @@ class Fighter:
 
     @property
     def endurance(self):
-        return self.base_endurance + self.endurance_modifier
+        total = self.base_endurance + self.endurance_modifier
+        return total if total > 0 else 1
 
     @property
     def endurance_modifier(self):
@@ -61,11 +63,14 @@ class Fighter:
         else:
             bonus = 0
 
+        if "exhausted" in self.effects:
+            bonus -= self.effects.get("exhausted").get("amount")
+
         return bonus
 
     @property
     def total_attack(self):
-        total = int(self.attack_bonus)
+        total = int(self.attack_bonus) + int(self.strength)
         return total
 
     @property
@@ -101,10 +106,17 @@ class Fighter:
         self.stamina = newStamina
         if self.stamina <= 0:
             self.stamina = 0
-            results.append({"exhausted": self.owner})
+            if not "exhausted" in self.effects:
+                self.effects["exhausted"] = {"amount": 1}
+            else:
+                self.effects["exhausted"]["amount"] += 1
+            print("Exhausted ", self.effects.get("exhausted").get("amount"))
+            # results.append({"exhausted": self.owner})
         return results
 
     def regain_stamina(self, amount):
+        if self.stamina >= self.max_stamina/2 and "exhausted" in self.effects:
+            self.effects.pop("exhausted")
         with decimal.localcontext() as ctx:
             ctx.prec = 3
             newStamina = decimal.Decimal(
@@ -129,7 +141,6 @@ class Fighter:
                 chosen_attack = self.owner.equipment.main_hand.equippable.equippable_attacks[randint(
                     0, len(self.owner.equipment.main_hand.equippable.equippable_attacks)-1)]
 
-        # Attack Contest
         attack_roll = randint(1, 10+self.total_attack)
         defense_roll = randint(1, 10+target.fighter.defense)
 
@@ -142,7 +153,10 @@ class Fighter:
                 weapon_damage = self.owner.equipment.main_hand.equippable.damage_bonus
             else:
                 weapon_damage = 0
-            damage = self.total_attack + weapon_damage - target.fighter.defense
+            damage = randint(1, self.total_attack +
+                             weapon_damage) - target.fighter.defense
+            if damage <= 0:
+                damage = 1
             attack_msg = chosen_attack.hit_description.format(
                 self.owner.name.capitalize(), target.name, str(damage))
             if damage > 0:
